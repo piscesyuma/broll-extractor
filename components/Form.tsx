@@ -19,6 +19,7 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
   const [isUploading, setIsUploading] = useState<boolean>(false)
   const [models, setModels] = useState(modelsList)
   const [currentModel, setCurrentModel] = useState<string>('gpt-4')
+  const [keywordExtractor, setKeywordExtractor] = useState<string>('3-keyword-extractor')
   const [uploadStatus, setUploadStatus] = useState<string>('')
   const [showFileUpload, setShowFileUpload] = useState<boolean>(false)
   const [showFileSelector, setShowFileSelector] = useState<boolean>(false)
@@ -53,29 +54,11 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
           ...prev,
           [file.name]: fileContent
         }))
-        // Add to available files if not already there
-        // setAvailableFiles(prev => ({
-        //   ...prev,
-        //   knowledge: prev.knowledge.includes(file.name) ? prev.knowledge : [...prev.knowledge, file.name]
-        // }))
-        // Auto-select the uploaded file
-        // setSelectedKnowledgeFiles(prev => 
-        //   prev.includes(file.name) ? prev : [...prev, file.name]
-        // )
       } else {
         setUploadedSchemaFiles(prev => ({
           ...prev,
           [file.name]: fileContent
         }))
-        // Add to available files if not already there
-        // setAvailableFiles(prev => ({
-        //   ...prev,
-        //   schema: prev.schema.includes(file.name) ? prev.schema : [...prev.schema, file.name]
-        // }))
-        // Auto-select the uploaded file
-        // setSelectedSchemaFiles(prev => 
-        //   prev.includes(file.name) ? prev : [...prev, file.name]
-        // )
       }
 
       setUploadStatus(`${type} file loaded successfully: ${file.name}`)
@@ -139,7 +122,7 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
     messageInput.current!.value = ''
     
     try {
-      const response = await fetch('/api/felidae-chat', {
+      const response = await fetch(`/api/${keywordExtractor}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,6 +201,10 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
     setCurrentModel(e.target.value)
   }
 
+  const handleKeywordExtractorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setKeywordExtractor(e.target.value)
+  }
+
   const toggleFileUpload = () => {
     setShowFileUpload(!showFileUpload)
   }
@@ -276,6 +263,15 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
                   {model.id}
                 </option>
               ))}
+            </select>
+            
+            <select
+              value={keywordExtractor}
+              onChange={handleKeywordExtractorChange}
+              className='px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all'
+            >
+              <option value='3-keyword-extractor'>3-Keyword Extractor</option>
+              <option value='4-keyword-extractor'>4-Keyword Extractor</option>
             </select>
           </div>
           
@@ -446,7 +442,7 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
                   <button
                     type='button'
                     onClick={toggleFileSelector}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors hidden ${
                       showFileSelector 
                         ? 'bg-blue-500 text-white' 
                         : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'

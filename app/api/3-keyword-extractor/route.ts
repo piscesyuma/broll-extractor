@@ -36,10 +36,11 @@ export async function POST(request: Request) {
     // Build knowledge base content from uploaded files or defaults
     let knowledgeBaseContent = ''
 
-    if (selectedKnowledgeFiles?.includes('broll-keyword-engine.md')) {
-      const filePath = join(process.cwd(), 'public', 'knowledge', 'broll-keyword-engine.md')
-      knowledgeBaseContent = await readFile(filePath, 'utf-8')
-    }
+    let filePath = join(process.cwd(), 'public', 'base_engine', 'broll-keyword-engine.md')
+    const baseEngine = await readFile(filePath, 'utf-8')
+
+    filePath = join(process.cwd(), 'public', 'knowledge', '3-keyword-knowledge.md')
+    knowledgeBaseContent = await readFile(filePath, 'utf-8')
 
     for (const filename of Object.keys(uploadedKnowledgeFiles)) {
       let content = ''
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
     }
 
     // Convert knowledge base and schema content to string and prepend to message
-    const enhancedMessage = `Knowledge Base:${knowledgeBaseContent}\n\nSchema Tool:${schemaToolContent}\n\nUser Query: ${message}`
+    const enhancedMessage = `Base Engine: ${baseEngine}\n\n Knowledge Base:${knowledgeBaseContent}\n\nSchema Tool:${schemaToolContent}\n\nUser Query: ${message}`
     
     console.log('Knowledge base content length:', knowledgeBaseContent.length)
     console.log('Schema tool content length:', schemaToolContent.length)
