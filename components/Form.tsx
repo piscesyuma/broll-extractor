@@ -18,7 +18,7 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isUploading, setIsUploading] = useState<boolean>(false)
   const [models, setModels] = useState(modelsList)
-  const [currentModel, setCurrentModel] = useState<string>('gpt-4')
+  const [currentModel, setCurrentModel] = useState<string>('gpt-4.1-nano')
   const [keywordExtractor, setKeywordExtractor] = useState<string>('3-keyword-extractor')
   const [uploadStatus, setUploadStatus] = useState<string>('')
   const [showFileUpload, setShowFileUpload] = useState<boolean>(false)
