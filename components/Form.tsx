@@ -25,6 +25,8 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
   const [availableFiles, setAvailableFiles] = useState<{knowledge: string[], schema: string[]}>({knowledge: [], schema: []})
   const [selectedKnowledgeFiles, setSelectedKnowledgeFiles] = useState<string[]>(['broll-keyword-engine.md'])
   const [selectedSchemaFiles, setSelectedSchemaFiles] = useState<string[]>(['3-keyword-extractor.md'])
+  const [uploadedKnowledgeFiles, setUploadedKnowledgeFiles] = useState<{[key: string]: string}>({})
+  const [uploadedSchemaFiles, setUploadedSchemaFiles] = useState<{[key: string]: string}>({})
 
   const handleEnter = (
     e: React.KeyboardEvent<HTMLTextAreaElement> &
@@ -39,24 +41,44 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
 
   const handleFileUpload = async (file: File, type: 'knowledge' | 'schema') => {
     setIsUploading(true)
-    setUploadStatus(`Uploading ${type} file...`)
-
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('type', type)
+    setUploadStatus(`Reading ${type} file...`)
 
     try {
-      const response = await fetch('/api/upload-files', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.statusText}`)
+      // Read file content
+      const fileContent = await readFileContent(file)
+      
+      // Store file content in state
+      if (type === 'knowledge') {
+        setUploadedKnowledgeFiles(prev => ({
+          ...prev,
+          [file.name]: fileContent
+        }))
+        // Add to available files if not already there
+        // setAvailableFiles(prev => ({
+        //   ...prev,
+        //   knowledge: prev.knowledge.includes(file.name) ? prev.knowledge : [...prev.knowledge, file.name]
+        // }))
+        // Auto-select the uploaded file
+        // setSelectedKnowledgeFiles(prev => 
+        //   prev.includes(file.name) ? prev : [...prev, file.name]
+        // )
+      } else {
+        setUploadedSchemaFiles(prev => ({
+          ...prev,
+          [file.name]: fileContent
+        }))
+        // Add to available files if not already there
+        // setAvailableFiles(prev => ({
+        //   ...prev,
+        //   schema: prev.schema.includes(file.name) ? prev.schema : [...prev.schema, file.name]
+        // }))
+        // Auto-select the uploaded file
+        // setSelectedSchemaFiles(prev => 
+        //   prev.includes(file.name) ? prev : [...prev, file.name]
+        // )
       }
 
-      const result = await response.json()
-      setUploadStatus(`${type} file uploaded successfully: ${result.filename}`)
+      setUploadStatus(`${type} file loaded successfully: ${file.name}`)
       
       // Clear file input
       if (type === 'knowledge' && knowledgeFileInput.current) {
@@ -68,12 +90,26 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
 
       setTimeout(() => setUploadStatus(''), 3000)
     } catch (error) {
-      console.error('Upload error:', error)
-      setUploadStatus(`Error: ${error instanceof Error ? error.message : 'Upload failed'}`)
+      console.error('File reading error:', error)
+      setUploadStatus(`Error: ${error instanceof Error ? error.message : 'Failed to read file'}`)
       setTimeout(() => setUploadStatus(''), 5000)
     } finally {
       setIsUploading(false)
     }
+  }
+
+  const readFileContent = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const content = e.target?.result as string
+        resolve(content)
+      }
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'))
+      }
+      reader.readAsText(file)
+    })
   }
 
   const handleKnowledgeFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,6 +149,8 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
           currentModel,
           selectedKnowledgeFiles,
           selectedSchemaFiles,
+          uploadedKnowledgeFiles,
+          uploadedSchemaFiles,
         }),
       })
       
@@ -260,7 +298,7 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
               >
                 <path d='M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5l-2-2H5a2 2 0 00-2 2z'></path>
               </svg>
-              <span>{showFileUpload ? 'Hide Files' : 'Show Files'}</span>
+              <span>{showFileUpload ? 'Hide File Upload' : 'Show File Upload'}</span>
             </button>
             
             <button
@@ -281,14 +319,14 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
             <div className='bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6'>
               <h2 className='text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center'>
                 <span className='mr-2'>📁</span>
-                File Management
+                File Management (Local Storage)
               </h2>
               
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 {/* Knowledge File Upload */}
                 <div className='space-y-2'>
                   <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                    Knowledge Base Files (.md)
+                    Knowledge Base Files (.md, .txt)
                   </label>
                   <div className='flex items-center space-x-2'>
                     <input
@@ -301,14 +339,19 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
                     />
                   </div>
                   <p className='text-xs text-gray-500 dark:text-gray-400'>
-                    Upload to /public/knowledge/
+                    Files stored locally in browser memory
                   </p>
+                  {Object.keys(uploadedKnowledgeFiles).length > 0 && (
+                    <div className='text-xs text-green-600 dark:text-green-400'>
+                      Loaded files: {Object.keys(uploadedKnowledgeFiles).join(', ')}
+                    </div>
+                  )}
                 </div>
 
                 {/* Schema File Upload */}
                 <div className='space-y-2'>
                   <label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
-                    Schema Tool Files (.md)
+                    Schema Tool Files (.md, .txt)
                   </label>
                   <div className='flex items-center space-x-2'>
                     <input
@@ -321,8 +364,13 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
                     />
                   </div>
                   <p className='text-xs text-gray-500 dark:text-gray-400'>
-                    Upload to /public/schema/
+                    Files stored locally in browser memory
                   </p>
+                  {Object.keys(uploadedSchemaFiles).length > 0 && (
+                    <div className='text-xs text-green-600 dark:text-green-400'>
+                      Loaded files: {Object.keys(uploadedSchemaFiles).join(', ')}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -404,7 +452,7 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
                         : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                     }`}
                   >
-                    {showFileSelector ? 'Hide Files' : 'Select Files'}
+                    {showFileSelector ? 'Hide Files' : 'Select Default Files'}
                   </button>
                 </div>
                 

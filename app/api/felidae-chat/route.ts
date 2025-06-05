@@ -6,61 +6,82 @@ type RequestData = {
   message: string
   selectedKnowledgeFiles?: string[]
   selectedSchemaFiles?: string[]
+  uploadedKnowledgeFiles?: {[key: string]: string}
+  uploadedSchemaFiles?: {[key: string]: string}
 }
 
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
-  const { message, currentModel, selectedKnowledgeFiles, selectedSchemaFiles } = (await request.json()) as RequestData
+  const { 
+    message, 
+    currentModel, 
+    selectedKnowledgeFiles, 
+    selectedSchemaFiles,
+    uploadedKnowledgeFiles = {},
+    uploadedSchemaFiles = {}
+  } = (await request.json()) as RequestData
 
   console.log('Message:', message, 'Model:', currentModel)
   console.log('Selected Knowledge Files:', selectedKnowledgeFiles)
   console.log('Selected Schema Files:', selectedSchemaFiles)
+  console.log('Uploaded Knowledge Files:', Object.keys(uploadedKnowledgeFiles))
+  console.log('Uploaded Schema Files:', Object.keys(uploadedSchemaFiles))
 
   if (!message) {
     return new Response('No message in the request', { status: 400 })
   }
 
   try {
-    // Use default files if none selected
-    const knowledgeFiles = selectedKnowledgeFiles && selectedKnowledgeFiles.length > 0 
-      ? selectedKnowledgeFiles 
-      : ['broll-keyword-engine.md']
-    
-    const schemaFiles = selectedSchemaFiles && selectedSchemaFiles.length > 0 
-      ? selectedSchemaFiles 
-      : ['3-keyword-extractor.md']
-
-    // Read multiple knowledge base files
+    // Build knowledge base content from uploaded files or defaults
     let knowledgeBaseContent = ''
-    for (const filename of knowledgeFiles) {
-      try {
-        const filePath = join(process.cwd(), 'public', 'knowledge', filename)
-        const content = await readFile(filePath, 'utf-8')
-        knowledgeBaseContent += `\n--- ${filename} ---\n${content}\n`
-      } catch (error) {
-        console.warn(`Could not read knowledge file: ${filename}`, error)
-      }
+
+    if (selectedKnowledgeFiles?.includes('broll-keyword-engine.md')) {
+      const filePath = join(process.cwd(), 'public', 'knowledge', 'broll-keyword-engine.md')
+      knowledgeBaseContent = await readFile(filePath, 'utf-8')
+    }
+
+    for (const filename of Object.keys(uploadedKnowledgeFiles)) {
+      let content = ''
+      
+      // First try to get from uploaded files
+      content = uploadedKnowledgeFiles[filename]
+      console.log(`Using uploaded content for knowledge file: ${filename}`)
+      
+      knowledgeBaseContent += `\n--- ${filename} ---\n${content}\n`
     }
     
-    // Read multiple schema tool files
+    // Build schema tool content from uploaded files or defaults
     let schemaToolContent = ''
-    for (const filename of schemaFiles) {
-      try {
-        const filePath = join(process.cwd(), 'public', 'schema', filename)
-        const content = await readFile(filePath, 'utf-8')
-        schemaToolContent += `\n--- ${filename} ---\n${content}\n`
-      } catch (error) {
-        console.warn(`Could not read schema file: ${filename}`, error)
+    const filePathSchema = join(process.cwd(), 'public', 'schema', '3-keyword-extractor.md')
+    const defaultSchemaToolContent = await readFile(filePathSchema, 'utf-8')
+
+    for (const filename of Object.keys(uploadedSchemaFiles)) {
+      let content = ''
+      
+      // First try to get from uploaded files
+      if (uploadedSchemaFiles[filename]) {
+        content = uploadedSchemaFiles[filename]
+        console.log(`Using uploaded content for schema file: ${filename}`)
+      } else {
+        // Fallback to default content
+        content = defaultSchemaToolContent
+        console.log(`Using default content for schema file: ${filename}`)
       }
+      
+      schemaToolContent += `\n--- ${filename} ---\n${content}\n`
     }
     
+    if (schemaToolContent.length === 0) {
+      schemaToolContent = defaultSchemaToolContent
+    }
+
     // Convert knowledge base and schema content to string and prepend to message
     const enhancedMessage = `Knowledge Base:${knowledgeBaseContent}\n\nSchema Tool:${schemaToolContent}\n\nUser Query: ${message}`
     
     console.log('Knowledge base content length:', knowledgeBaseContent.length)
     console.log('Schema tool content length:', schemaToolContent.length)
-    
+
     // Create FormData for multipart/form-data request
     const formData = new FormData()
     formData.append('model', currentModel || 'gpt-4')
