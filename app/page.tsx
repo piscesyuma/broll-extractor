@@ -12,9 +12,10 @@ function getBaseURL() {
 }
 
 export default async function Home() {
-  const modelsList = (await (
-    await fetch(`https://chatgpt.shivanshu.in/api/models`)
-  ).json()) as OpenAI.ModelsPage
+  // const modelsList = (await (
+  //   await fetch(`https://chatgpt.shivanshu.in/api/models`)
+  // ).json()) as OpenAI.ModelsPage
+  const modelsList = [{id: 'gpt-4', object: 'model', owned_by: 'openai', created: 1717622400}]
   // console.log(modelsList)
   return (
     <main className={inter.className}>

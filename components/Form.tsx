@@ -10,14 +10,14 @@ const LoadingSpinner = () => (
   </div>
 )
 
-const Form = ({ modelsList }: { modelsList: OpenAI.ModelsPage }) => {
+const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
   const messageInput = useRef<HTMLTextAreaElement | null>(null)
   const knowledgeFileInput = useRef<HTMLInputElement | null>(null)
   const schemaFileInput = useRef<HTMLInputElement | null>(null)
   const [history, setHistory] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isUploading, setIsUploading] = useState<boolean>(false)
-  const [models, setModels] = useState(modelsList.data)
+  const [models, setModels] = useState(modelsList)
   const [currentModel, setCurrentModel] = useState<string>('gpt-4')
   const [uploadStatus, setUploadStatus] = useState<string>('')
   const [showFileUpload, setShowFileUpload] = useState<boolean>(false)
