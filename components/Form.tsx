@@ -35,7 +35,7 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
   ) => {
     if (e.key === 'Enter' && !e.shiftKey && isLoading === false) {
       e.preventDefault()
-      setIsLoading(true)
+     
       handleSubmit(e)
     }
   }
@@ -111,15 +111,14 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setIsLoading(true)
     const message = messageInput.current?.value
-
     if (!message || !message.trim()) {
       setIsLoading(false)
       return
     }
-
     // Clear the input field
-    messageInput.current!.value = ''
+    // messageInput.current!.value = ''
     
     try {
       const response = await fetch(`/api/${keywordExtractor}`, {
@@ -272,6 +271,7 @@ const Form = ({ modelsList }: { modelsList: {id: string}[] }) => {
             >
               <option value='3-keyword-extractor'>3-Keyword Extractor</option>
               <option value='4-keyword-extractor'>4-Keyword Extractor</option>
+              <option value='metadata-generator'>Metadata Generator</option>
             </select>
           </div>
           

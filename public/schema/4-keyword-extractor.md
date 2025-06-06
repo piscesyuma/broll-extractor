@@ -59,7 +59,8 @@ wide, handheld, macro, POV
 
 4. SAC+ Enforcement
 Use one element from each category:
-Subject: woman, teen, hands, man, etc.
+Subject: Use only castable human anchors: woman, man, girl, boy, child, teen, father, mother, doctor, nurse, patient, etc.
+❌ Never use names (e.g., Anna, Max, Mark etc)
 
 
 Action: expressive and visible (not internal/abstract)
@@ -388,6 +389,7 @@ Exactly 4 keywords per sentence in the format:
 ❌ Do not add extra descriptors or transitions.
 ❌ Do not output explanations unless requested.
 ✅ Output only the 4-keyword phrase in editor-searchable format.
+Use castable roles only — never use proper names (e.g., Anna, Max).
 
 
 

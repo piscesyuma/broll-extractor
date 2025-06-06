@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
     let knowledgeBaseContent = ''
 
-    filePath = join(process.cwd(), 'public', 'knowledge', '4-keyword-knowledge.md')
+    filePath = join(process.cwd(), 'public', 'knowledge', 'metadata-knowledge.md')
     knowledgeBaseContent = await readFile(filePath, 'utf-8')
 
     for (const filename of Object.keys(uploadedKnowledgeFiles)) {
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     
     // Build schema tool content from uploaded files or defaults
     let schemaToolContent = ''
-    const filePathSchema = join(process.cwd(), 'public', 'schema', '4-keyword-extractor.md')
+    const filePathSchema = join(process.cwd(), 'public', 'schema', 'metadata-extractor.md')
     const defaultSchemaToolContent = await readFile(filePathSchema, 'utf-8')
 
     for (const filename of Object.keys(uploadedSchemaFiles)) {
