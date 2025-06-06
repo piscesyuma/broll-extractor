@@ -106,24 +106,16 @@ Texture & Aesthetic – Convey realism, style, or memory (e.g., grainy, bokeh bl
 
 
 Emotional Taxonomy (Core VSL Emotions)
-Core Emotion
-Subtypes / Use Case Contexts
-Fear
-Cognitive decay, paranoia, medical dread
-Shame
-Social awkwardness, failure to perform
-Anxiety
-Overstimulation, tech stress, burnout
-Hope
-Love, future reflection, family ties
-Nostalgia
-Childhood, emotional heritage
-Urgency
-Countdown, threat escalation
-Awe
-Mystery, secrets, transformation
-Responsibility
-Family, community impact
+| Core Emotion | Subtypes / Use Case Contexts |
+|--------------|------------------------------|
+| Fear | Cognitive decay, paranoia, medical dread |
+| Shame | Social awkwardness, failure to perform |
+| Anxiety | Overstimulation, tech stress, burnout |
+| Hope | Love, future reflection, family ties |
+| Nostalgia | Childhood, emotional heritage |
+| Urgency | Countdown, threat escalation |
+| Awe | Mystery, secrets, transformation |
+| Responsibility | Family, community impact |
 
 
 
